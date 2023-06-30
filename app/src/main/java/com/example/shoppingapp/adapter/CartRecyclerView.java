@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.shoppingapp.CartActivity;
 import com.example.shoppingapp.Domain.ItemModelClass;
 import com.example.shoppingapp.R;
 
@@ -25,22 +26,11 @@ import java.util.ArrayList;
 public class CartRecyclerView extends RecyclerView.Adapter<CartRecyclerView.ViewHolder> {
 
     private final Context context;
-//    private final ArrayList<ItemModelClass> items;
-
-    //created an array for quantity to each item in the list
-//    private int[] quantity;
-
 
     // Constructor
-    public CartRecyclerView(Context context, ArrayList<ItemModelClass> items) {
+    public CartRecyclerView(Context context) {
         this.context = context;
-//        this.items = items;
-//        this.quantity = quantity;
     }
-
-//    public int[] getItemsQuantity(){
-//        return quantity;
-//    }
 
     @NonNull
     @Override
@@ -53,7 +43,6 @@ public class CartRecyclerView extends RecyclerView.Adapter<CartRecyclerView.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-//        ItemModelClass item = cartedItems.get(position);
 
         //image
         String picUrl = cartedItems.get(position).getImageUrl();
@@ -63,13 +52,7 @@ public class CartRecyclerView extends RecyclerView.Adapter<CartRecyclerView.View
                 .into(holder.cartImage);
         //item name
         holder.cartName.setText(cartedItems.get(position).getName());
-
         holder.cartCount.setText(String.valueOf(cartedItems.get(position).getQuantity()));
-
-        //invisibling minus
-//        if(holder.cartCount.getText().toString().equals("0")){
-//            holder.cartMinusBtn.setVisibility(View.INVISIBLE);
-//        }
 
         //item cost*quantity
         int cost = ((int)Integer.parseInt(holder.cartCount.getText().toString())) * cartedItems.get(position).getCost();
@@ -80,37 +63,34 @@ public class CartRecyclerView extends RecyclerView.Adapter<CartRecyclerView.View
             cartedItems.get(position).setQuantity(cartedItems.get(position).getQuantity()-1);
             int quantity = cartedItems.get(position).getQuantity();
             holder.cartCount.setText(String.valueOf(quantity));
-//            item.setQuantity(quantity[position]);
+
             if(holder.cartCount.getText().toString().equals("0")) {
                 holder.cartMinusBtn.setVisibility(View.INVISIBLE);
             }
             holder.cartCost.setText(String.valueOf(cartedItems.get(position).getCost() * Integer.parseInt(holder.cartCount.getText().toString())));
+            CartActivity.bill(cartedItems);
         });
 
         //plus
-        holder.cartPlusBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cartedItems.get(position).setQuantity(cartedItems.get(position).getQuantity()+1);
-                int quantity = cartedItems.get(position).getQuantity();
-                if(quantity>0){
-                    holder.cartMinusBtn.setVisibility(View.VISIBLE);
-                }
-                if(quantity > cartedItems.get(position).getStock()){
-                    cartedItems.get(position).setQuantity(quantity-1);
-                    Toast.makeText(context,"No More Stock", Toast.LENGTH_SHORT).show();
-                }
-                else{
-
-//                    Log.d("plus","++");
-//                    item.setQuantity(quantity);
-//                    Log.d("plus",""+item.getQuantity());
-                    holder.cartCount.setText(String.valueOf(quantity));
-                }
-                holder.cartCost.setText(String.valueOf(cartedItems.get(position).getCost() * Integer.parseInt(holder.cartCount.getText().toString())));
-                Toast.makeText(context, ""+cartedItems.get(position).getQuantity(),0).show();
+        holder.cartPlusBtn.setOnClickListener(v -> {
+            cartedItems.get(position).setQuantity(cartedItems.get(position).getQuantity()+1);
+            int quantity = cartedItems.get(position).getQuantity();
+            if(quantity>0){
+                holder.cartMinusBtn.setVisibility(View.VISIBLE);
             }
+            if(quantity > cartedItems.get(position).getStock()){
+                cartedItems.get(position).setQuantity(quantity-1);
+                Toast.makeText(context,"No More Stock", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                holder.cartCount.setText(String.valueOf(quantity));
+            }
+            holder.cartCost.setText(String.valueOf(cartedItems.get(position).getCost() * Integer.parseInt(holder.cartCount.getText().toString())));
+            Toast.makeText(context, ""+cartedItems.get(position).getQuantity(),0).show();
+            CartActivity.bill(cartedItems);
         });
+
+
     }
 
 

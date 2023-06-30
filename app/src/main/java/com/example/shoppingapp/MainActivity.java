@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -20,11 +22,21 @@ import com.example.shoppingapp.adapter.ItemsAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private SharedPreferences sharedPreferences; 
+
+    //todo shared preference lo nundi data oncreate lo teeskovali, data ni malli ondestroy lo store cheyyali sharedpref lo
+            //intro page create cheyyaali andhulo login undali
+            //todo menu create chesi andulo- "admin mode meedha click cheysthey data ni manipulate cheyyagalagaali
+            //adim user details already create chesi key value pair la save cheyyaali sharedpref lo
+            // login ki otp pettali
     private ItemsAdapter itemsRecyclerViewAdapter;
+
+
     private CategoryAdapter categoryRecyclerViewAdapter;
     private ArrayList<ItemModelClass> itemsArrayList;
     private  RecyclerView recyclerViewCategoryList, recyclerViewItemsList;
@@ -38,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        getItemsArrayList();
+        
         cartBtn = findViewById(R.id.cartBtn);
 
         handler = new Handler(Looper.getMainLooper());
@@ -64,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void getItemsArrayList() {
+        sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString("itemsArray", null);
+        ArrayList<ItemModelClass> items = new Gson().fromJson(json, new TypeToken<ArrayList<String>>() {}.getType());
+        if(items != null){
+            itemsArrayList = items;
+        }
     }
 
     private void assigningQuantitiesOfEachItem(int[] quantity) {
@@ -101,10 +125,25 @@ public class MainActivity extends AppCompatActivity {
         itemsArrayList.add(new ItemModelClass("Cabbage","cabbage","","vegetable",0,5,35,""));
         itemsArrayList.add(new ItemModelClass("Cabbage","cabbage","","vegetable",0,5,35,""));
         itemsArrayList.add(new ItemModelClass("Cabbage","cabbage","","vegetable",0,5,35,""));
-//        foodList.add(new PopularDomain("Cheese Burger", "pop_2", "beef, Gouda cheese", 5.64));
-//        foodList.add(new PopularDomain("Vegetable pizza", "pop_3", "olive oil, vegetable oil", 6.77));
 
         itemsRecyclerViewAdapter= new ItemsAdapter(this,itemsArrayList);
         recyclerViewItemsList.setAdapter(itemsRecyclerViewAdapter);
     }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        setItemsArrayListIntoSharedPrefs();
+    }
+
+    private void setItemsArrayListIntoSharedPrefs() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String json =   new Gson().toJson(itemsArrayList);
+        editor.putString("itemsArray", json);
+        editor.apply();
+
+    }
+
 }

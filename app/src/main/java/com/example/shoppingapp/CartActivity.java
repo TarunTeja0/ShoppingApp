@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.example.shoppingapp.Domain.ItemModelClass;
@@ -20,9 +21,11 @@ import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 
 public class CartActivity extends AppCompatActivity {
-    int[] quantity;
+    private Intent intent;
     ArrayList<ItemModelClass> items;
-    private TextView cartAmount, deliveryCharges, total;
+    private static TextView cartAmount;
+    private static TextView deliveryCharges;
+    private static TextView total;
     private CartRecyclerView cartRecyclerViewAdapter;
     private RecyclerView cartRecyclerView;
     public static ArrayList<ItemModelClass> cartedItems = new ArrayList<>();
@@ -34,39 +37,17 @@ public class CartActivity extends AppCompatActivity {
         deliveryCharges = findViewById(R.id.cartAmount2);
         total = findViewById(R.id.cartAmount3);
         cartRecyclerView =findViewById(R.id.cartRecyclerView);
-        Intent intent = getIntent();
-        quantity = intent.getIntArrayExtra("quantitiesArray");
+        intent = getIntent();
         String jsonString = intent.getStringExtra("itemsArrayList");
         TypeToken<ArrayList<ItemModelClass>> typeToken = new TypeToken<ArrayList<ItemModelClass>>() {};
 
        items = new Gson().fromJson(jsonString,typeToken);
        cartedItems= filterItems(items);
 
-       cartRecyclerViewAdapter =new CartRecyclerView(this, cartedItems);
+       cartRecyclerViewAdapter =new CartRecyclerView(this);
+
        cartRecyclerView.setAdapter(cartRecyclerViewAdapter);
        cartRecyclerView.setLayoutManager(new LinearLayoutManager(this,RecyclerView.VERTICAL,false));
-        cartRecyclerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bill(cartedItems);
-            }
-        });
-//        new RecyclerView.OnItemTouchListener() {
-//            @Override
-//            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-//                bill();
-//            }
-//
-//            @Override
-//            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-//
-//            }
-//        });
 
     }
 
@@ -83,7 +64,7 @@ public class CartActivity extends AppCompatActivity {
 
     }
 
-    private void bill(ArrayList<ItemModelClass> items){
+    public static void bill(ArrayList<ItemModelClass> items){
         int cartTotal=0;
         int deliveryChar= 15;
 
@@ -97,5 +78,11 @@ public class CartActivity extends AppCompatActivity {
         deliveryCharges.setText(String.valueOf(deliveryChar));
         total.setText(String.valueOf(cartTotal + deliveryChar));
 
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }
